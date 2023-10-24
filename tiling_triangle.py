@@ -3,6 +3,29 @@
 import math
 import matplotlib.pyplot as plt
 
+# 6頂点を起点とする。再起的に2分割し、頂点を追加していく (2分割で20面体, 12頂点となる)
+vertices = [
+    (-1,  0,  0),
+    (1,  0,  0),
+    (0, -1,  0),
+    (0,  1,  0),
+    (0,  0, -1),
+    (0,  0,  1)
+]
+
+faces = [
+    [0, 2, 4],
+    [2, 1, 4],
+    [1, 3, 4],
+    [3, 0, 4],
+    [0, 5, 2],
+    [2, 5, 1],
+    [1, 5, 3],
+    [3, 5, 0],
+]
+
+subdivision_level = 2 # 20面体
+
 def icosphere_subdivision(vertices, faces):
     def add_vertex(v):
         length = math.sqrt(v[0]**2 + v[1]**2 + v[2]**2)
@@ -40,45 +63,41 @@ def icosphere_subdivision(vertices, faces):
 
     return faces_subdivided
 
-# 6頂点を起点とする。再起的に2分割し、頂点を追加していく (2分割で20面体, 12頂点となる)
-vertices = [
-    (-1,  0,  0),
-    (1,  0,  0),
-    (0, -1,  0),
-    (0,  1,  0),
-    (0,  0, -1),
-    (0,  0,  1)
-]
+# 半球を描画
+def draw_sphere():
+    for face in faces:
 
-faces = [
-    [0, 2, 4],
-    [2, 1, 4],
-    [1, 3, 4],
-    [3, 0, 4],
-    [0, 5, 2],
-    [2, 5, 1],
-    [1, 5, 3],
-    [3, 5, 0],
-]
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
 
-subdivision_level = 2 # 20面体
+        for face in faces:
+            x = [vertices[v][0] for v in face]
+            y = [vertices[v][1] for v in face]
+            z = [vertices[v][2] for v in face]
+            ax.plot_trisurf(x, y, z)
+
+        plt.show()
+
+# 半球をxy平面に投影
+def draw_expansion_xy_plane():
+    for face in faces:
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        for face in faces:
+            x = [vertices[v][0] for v in face]
+            y = [vertices[v][1] for v in face]
+            ax.plot(x, y)
+
+        plt.show()
+    
+# 2分割して20面体を作る
 for _ in range(subdivision_level):
     faces = icosphere_subdivision(vertices, faces)
 
 # 半球のみを残す (y軸正方向の頂点のみ残す)  
 faces = [face for face in faces if all(vertices[v][2] >= 0 for v in face)]
+draw_expansion_xy_plane()
 
-# Display the result
-for face in faces:
-    print(face)
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    for face in faces:
-        x = [vertices[v][0] for v in face]
-        y = [vertices[v][1] for v in face]
-        z = [vertices[v][2] for v in face]
-        ax.plot_trisurf(x, y, z)
-
-    plt.show()
+# todo: 半球の展開図を作成する (内閣の輪を180°以上に設定する)
